@@ -1,0 +1,20 @@
+{
+  "name": "@codex-improvement-lab/releaseframe",
+  "version": "0.1.0-alpha.1",
+  "description": "Turn two local screenshots and a declared metric limit into a reviewable release card.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Elias S.W. (eliasruntime)",
+  "engines": {"node": ">=22"},
+  "packageManager": "pnpm@11.19.0",
+  "bin": {"releaseframe": "./src/cli.js"},
+  "exports": {".": "./src/index.js"},
+  "files": ["src", "assets", "examples", "docs", "README.md", "CHANGELOG.md", "LICENSE"],
+  "scripts": {
+    "test": "node --test --test-concurrency=1",
+    "smoke": "node scripts/package-smoke.mjs"
+  },
+  "dependencies": {"@resvg/resvg-js": "2.6.2"},
+  "repository": {"type": "git", "url": "git+https://github.com/codex-improvement-lab/releaseframe.git"},
+  "keywords": ["agents", "release", "social-card", "visual-proof", "screenshots", "offline"]
+}

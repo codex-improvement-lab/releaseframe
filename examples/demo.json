@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "releaseframe/1",
+  "brand": "RELEASEFRAME",
+  "version": "ALPHA PREVIEW",
+  "headline": "A longer label changed the page.",
+  "dek": "Two authored screenshots illustrate a width check and review.",
+  "metric": {"label": "Document width", "unit": "px", "baseline": 385, "tolerance": 1, "mode": "at-most"},
+  "panels": [
+    {
+      "label": "First candidate",
+      "value": 435,
+      "image": "demo-before.png",
+      "cropY": 100,
+      "caption": "The label runs beyond the narrow page in this illustration.",
+      "alt": "Authored mobile app drawing with a long key clipped at the right edge."
+    },
+    {
+      "label": "Reviewed candidate",
+      "value": 385,
+      "image": "demo-after.png",
+      "cropY": 100,
+      "caption": "The same content is shown on two lines in this illustration.",
+      "alt": "Authored mobile app drawing with the same key shown on two lines."
+    }
+  ],
+  "source": {
+    "label": "Authored Releaseframe example, not a customer incident",
+    "url": "https://github.com/codex-improvement-lab/releaseframe/tree/main/examples"
+  },
+  "scope": "Illustrative values supplied in JSON, not measured from these drawings.",
+  "releaseUrl": "https://github.com/codex-improvement-lab/releaseframe",
+  "postDraft": "An authored example: two screenshots, one numeric limit, one reviewable comparison card. Inspect the image and declared data before sharing."
+}

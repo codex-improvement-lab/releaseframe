@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="375" height="667" viewBox="0 0 375 667">
+  <rect width="375" height="667" fill="#fffdf7"/>
+  <rect width="375" height="72" fill="#17211c"/>
+  <text x="24" y="46" font-family="Inter" font-size="20" font-weight="700" fill="#fffdf7">EXAMPLE APP</text>
+  <text x="24" y="135" font-family="Inter" font-size="27" font-weight="700" fill="#17211c">Release details</text>
+  <text x="24" y="179" font-family="Inter" font-size="14" fill="#526059">Authored illustration, no live service</text>
+  <text x="24" y="237" font-family="Inter" font-size="16" font-weight="700" fill="#17211c">RELEASE KEY</text>
+  <rect x="24" y="256" width="327" height="82" rx="6" fill="#f4f0e6" stroke="#17211c"/>
+  <text x="33" y="290" font-family="Inter" font-size="17" fill="#205f48">KEY-2026-VERY-LONG-IDENTIFIER</text>
+  <text x="33" y="316" font-family="Inter" font-size="17" fill="#205f48">-ESCAPING-THE-PAGE</text>
+  <text x="24" y="392" font-family="Inter" font-size="16" fill="#526059">An Agent's reviewed screenshot</text>
+</svg>
