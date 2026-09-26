@@ -5,6 +5,7 @@ import { createHash } from "node:crypto";
 import { mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const tarball = process.argv.slice(2).filter(arg => arg !== "--")[0];
 if (!tarball || !process.env.npm_execpath) throw new Error("Run pnpm smoke <tarball>");
@@ -45,8 +46,20 @@ try {
   await readFile(path.join(out, "post.txt"), "utf8");
   const refused = JSON.parse(await run(process.execPath, [cli, "demo", "--out", out, "--json"], temp, 2));
   assert.equal(refused.status, "error"); assert.match(refused.message, /EEXIST/);
+  // Model a caller supplying a separate font, not an undeclared system fallback.
+  const cjkBytes = await readFile(fileURLToPath(new URL("../test/fixtures/ReleaseframeTestCJK.otf", import.meta.url)));
+  await writeFile(path.join(temp, "caller-font.otf"), cjkBytes);
+  const chinese = JSON.parse(await readFile(path.join(packageRoot, "examples/demo-zh.json"), "utf8"));
+  chinese.font = "caller-font.otf";
+  for (const panel of chinese.panels) panel.image = path.join(packageRoot, "examples", panel.image);
+  await writeFile(path.join(temp, "chinese.json"), JSON.stringify(chinese));
+  const chineseOut = path.join(temp, "chinese-card");
+  const renderedChinese = JSON.parse(await run(process.execPath, [cli, "render", path.join(temp, "chinese.json"), "--out", chineseOut, "--json"], temp));
+  assert.equal(renderedChinese.status, "rendered");
+  const chineseReview = JSON.parse(await readFile(path.join(chineseOut, "review.json"), "utf8"));
+  assert.equal(chineseReview.font.sha256, createHash("sha256").update(cjkBytes).digest("hex"));
   console.log(JSON.stringify({ packedInstall: "passed", version: metadata.version,
-    demo: demo.status, noOverwrite: true, bytes: png.length, sha256: review.imageSha256 }));
+    demo: demo.status, customFontChinese: renderedChinese.status, noOverwrite: true, bytes: png.length, sha256: review.imageSha256 }));
 } finally {
   const actual = await realpath(temp), parent = await realpath(tmpdir());
   if (path.dirname(actual) === parent && path.basename(actual).startsWith("releaseframe-package-")) {

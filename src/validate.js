@@ -6,12 +6,12 @@ function object(value, name) {
   return value;
 }
 
-function field(value, name, max, { rendered = false, multiline = false } = {}) {
+function field(value, name, max, { rendered = false, multiline = false, customFont = false } = {}) {
   if (typeof value !== "string" || !value.trim() || [...value].length > max || forbidden.test(value)) {
     throw new Error(`${name} must be non-empty text of at most ${max} characters without control or bidi override characters`);
   }
   if (!multiline && /[\r\n\t]/.test(value)) throw new Error(`${name} must be a single line`);
-  if (rendered && !printableLatin.test(value)) throw new Error(`${name}: alpha.1 card text supports Latin characters only`);
+  if (rendered && !customFont && !printableLatin.test(value)) throw new Error(`${name}: set font to a local TTF or OTF for non-Latin card text`);
   return value.trim();
 }
 
@@ -38,14 +38,16 @@ export function weightedPostLength(value) {
 export function validateManifest(value) {
   const m = object(value, "manifest");
   if (m.schemaVersion !== "releaseframe/1") throw new Error("Expected schemaVersion releaseframe/1");
-  const brand = field(m.brand, "brand", 25, { rendered: true });
-  const version = field(m.version, "version", 22, { rendered: true });
-  const headline = field(m.headline, "headline", 59, { rendered: true });
-  const dek = field(m.dek, "dek", 95, { rendered: true });
+  const font = m.font === undefined ? undefined : field(m.font, "font", 400);
+  const cardText = { rendered: true, customFont: font !== undefined };
+  const brand = field(m.brand, "brand", 25, cardText);
+  const version = field(m.version, "version", 22, cardText);
+  const headline = field(m.headline, "headline", 59, cardText);
+  const dek = field(m.dek, "dek", 95, cardText);
   const source = object(m.source, "source");
-  const sourceLabel = field(source.label, "source.label", 86, { rendered: true });
+  const sourceLabel = field(source.label, "source.label", 86, cardText);
   const sourceUrl = httpsUrl(source.url, "source.url");
-  const scope = field(m.scope, "scope", 105, { rendered: true });
+  const scope = field(m.scope, "scope", 105, cardText);
   const releaseUrl = httpsUrl(m.releaseUrl, "releaseUrl");
   const postDraft = field(m.postDraft, "postDraft", 230, { multiline: true });
   if (postDraft.includes(releaseUrl)) throw new Error("postDraft should omit releaseUrl; it is appended once");
@@ -53,8 +55,8 @@ export function validateManifest(value) {
   if (weightedPostLength(post) > 280) throw new Error("Post draft exceeds the conservative 280-weight limit");
 
   const metric = object(m.metric, "metric");
-  const metricLabel = field(metric.label, "metric.label", 24, { rendered: true });
-  const unit = field(metric.unit, "metric.unit", 8, { rendered: true });
+  const metricLabel = field(metric.label, "metric.label", 24, cardText);
+  const unit = field(metric.unit, "metric.unit", 8, cardText);
   if (!/^[A-Za-z%/]+$/.test(unit)) throw new Error("metric.unit accepts letters, % and / only");
   const baseline = quantity(metric.baseline, "metric.baseline");
   const tolerance = quantity(metric.tolerance, "metric.tolerance", { maximum: 10_000 });
@@ -63,16 +65,16 @@ export function validateManifest(value) {
   const panels = m.panels.map((entry, index) => {
     const panel = object(entry, `panels[${index}]`);
     return {
-      label: field(panel.label, `panels[${index}].label`, 29, { rendered: true }),
+      label: field(panel.label, `panels[${index}].label`, 29, cardText),
       value: quantity(panel.value, `panels[${index}].value`),
       image: field(panel.image, `panels[${index}].image`, 400),
       cropY: panel.cropY === undefined ? 0 : quantity(panel.cropY, `panels[${index}].cropY`, { maximum: 8000 }),
-      caption: field(panel.caption, `panels[${index}].caption`, 90, { rendered: true }),
+      caption: field(panel.caption, `panels[${index}].caption`, 90, cardText),
       alt: field(panel.alt, `panels[${index}].alt`, 250),
     };
   });
   return {
-    schemaVersion: "releaseframe/1", brand, version, headline, dek,
+    schemaVersion: "releaseframe/1", ...(font === undefined ? {} : { font }), brand, version, headline, dek,
     metric: { label: metricLabel, unit, baseline, tolerance, mode: metric.mode },
     panels, source: { label: sourceLabel, url: sourceUrl }, scope, releaseUrl, postDraft, post,
   };

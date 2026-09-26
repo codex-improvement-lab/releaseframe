@@ -1,0 +1,9 @@
+{
+  "sourceUrl": "https://github.com/notofonts/noto-cjk/raw/main/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf",
+  "sourceSha256": "2c76254f6fc379fddfce0a7e84fb5385bb135d3e399294f6eeb6680d0365b74b",
+  "fixtureSha256": "9f9bd75cf25edab01101ef2c012852c732f439df105e544afa1b5a914c909089",
+  "fixtureBytes": 56956,
+  "operation": "fontTools subset: printable ASCII and characters in examples/demo-zh.json; renamed font family and PostScript names to ReleaseframeTestCJK; original copyright/license names retained",
+  "license": "SIL Open Font License 1.1; OFL.txt",
+  "scope": "Test fixture only; not a general Chinese font and not included in the npm tarball."
+}

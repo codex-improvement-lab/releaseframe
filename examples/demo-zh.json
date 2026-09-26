@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "releaseframe/1",
+  "font": "NotoSansCJKsc-Regular.otf",
+  "brand": "RELEASEFRAME",
+  "version": "中文演示",
+  "headline": "标签变长，页面也跟着变宽了。",
+  "dek": "两张自编截图，一项声明的宽度限制，交给人来复核。",
+  "metric": {"label": "页面宽度", "unit": "px", "baseline": 385, "tolerance": 1, "mode": "at-most"},
+  "panels": [
+    {
+      "label": "第一次结果",
+      "value": 435,
+      "image": "demo-before.png",
+      "cropY": 100,
+      "caption": "文字看起来相同，长标签却撑宽了页面。这张图需要继续修改。",
+      "alt": "自编移动页面示意图，长标签从右侧超出可视范围。"
+    },
+    {
+      "label": "复核后的结果",
+      "value": 385,
+      "image": "demo-after.png",
+      "cropY": 100,
+      "caption": "相同内容改为两行显示，声明的页面宽度回到限制内。",
+      "alt": "自编移动页面示意图，同一标签分成两行显示。"
+    }
+  ],
+  "source": {
+    "label": "Releaseframe 自编示例，不是真实客户案例",
+    "url": "https://github.com/codex-improvement-lab/releaseframe/tree/main/examples"
+  },
+  "scope": "数值由清单提供，工具没有从截图中测量；发布前请核对图片与表述。",
+  "releaseUrl": "https://github.com/codex-improvement-lab/releaseframe",
+  "postDraft": "让 Agent 把结果讲清楚：两张截图、一项限制，生成可以复核的中文对照卡片。自编演示，数值由清单提供。"
+}

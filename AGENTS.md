@@ -7,11 +7,16 @@ handoff. The input claim, source and caveat come from the caller; do not infer
 truth, approval, user adoption or a root cause from screenshots alone.
 
 Keep the first result local and complete. Never silently read files except the
-manifest and image paths it explicitly names. Never upload, post, sign in, invoke
+manifest, image and optional font paths it explicitly names. Never upload, post, sign in, invoke
 an LLM, inspect browser profiles or add telemetry. Refuse missing, unsupported,
 oversized or mismatched inputs and existing output directories. Do not describe
 the output as a privacy scrubber. Source screenshots and exported SVG can contain
 sensitive data; tell the user to review them before sharing.
+
+An optional `font` explicitly names one local TTF/OTF, relative to the manifest.
+Use those exact bytes for glyph coverage, layout and rendering. Do not discover,
+download or install fonts automatically. Missing glyphs and over-wide text must
+fail before creating output. The chosen font's hash belongs in review.json.
 
 This first-level directory is its own Git repository. Run Git, dependency,
 tests, package and release commands here. Preserve edits by others and sibling

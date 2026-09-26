@@ -5,8 +5,9 @@ import { createHash } from "node:crypto";
 import { Resvg } from "@resvg/resvg-js";
 import { renderCardSvg } from "./svg.js";
 import { validateManifest } from "./validate.js";
+import { createTypography } from "./typography.js";
 
-export const version = "0.1.0-alpha.1";
+export const version = "0.1.0-alpha.2";
 export { validateManifest, weightedPostLength } from "./validate.js";
 
 const sha256 = value => createHash("sha256").update(value).digest("hex");
@@ -38,12 +39,15 @@ export async function renderManifest({ manifestPath, outputDir }) {
   if (panels[0].width !== panels[1].width || panels[0].height !== panels[1].height) {
     throw new Error("Comparison screenshots must have the same dimensions");
   }
-  const fontPath = fileURLToPath(new URL("../assets/fonts/Inter.ttf", import.meta.url));
+  const fontPath = manifest.font ? path.resolve(path.dirname(absoluteManifest), manifest.font)
+    : fileURLToPath(new URL("../assets/fonts/Inter.ttf", import.meta.url));
+  if ((await fs.stat(fontPath)).size > 20_000_000) throw new Error("font must be at most 20 MB");
   const fontBytes = await fs.readFile(fontPath);
-  const svg = renderCardSvg(manifest, panels, fontBytes);
+  const typography = createTypography(fontBytes);
+  const svg = renderCardSvg(manifest, panels, typography);
   let png;
   try {
-    png = new Resvg(svg, { font: { fontFiles: [fontPath], loadSystemFonts: false, defaultFontFamily: "Inter" } }).render().asPng();
+    png = new Resvg(svg, { font: { loadSystemFonts: false } }).render().asPng();
   } catch (error) { throw new Error(`Could not render the supplied PNGs: ${error.message}`); }
   const alt = `${manifest.brand} ${manifest.version}: ${manifest.headline} ${manifest.metric.label} reference ${manifest.metric.baseline}${manifest.metric.unit}, tolerance ${manifest.metric.tolerance}${manifest.metric.unit}. `
     + panels.map((panel, index) => `Panel ${index + 1}, ${panel.label}: ${panel.value}${manifest.metric.unit}, ${panel.passes ? "within" : "outside"} the declared limit. ${panel.alt}`).join(" ")
@@ -51,6 +55,8 @@ export async function renderManifest({ manifestPath, outputDir }) {
   if ([...alt].length > 1000) throw new Error("Combined ALT text exceeds 1,000 characters; shorten panel descriptions");
   const review = {
     schemaVersion: "releaseframe-review/1", version, metric: manifest.metric,
+    font: { source: manifest.font ?? "bundled:Inter.ttf", family: typography.family,
+      postscriptName: typography.postscriptName, sha256: sha256(fontBytes), bytes: fontBytes.length },
     panels: panels.map(panel => ({ label: panel.label, image: panel.image, imageSha256: panel.sha256,
       imageBytes: panel.bytes, dimensions: [panel.width, panel.height], cropY: panel.cropY, value: panel.value, passes: panel.passes })),
     source: manifest.source, scope: manifest.scope, releaseUrl: manifest.releaseUrl,

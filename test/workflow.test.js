@@ -101,3 +101,41 @@ test("packaged CLI shape gives JSON success and explicit malformed-argument fail
     assert.equal(error.code, 2); assert.equal(JSON.parse(error.stdout).status, "error"); return true;
   });
 });
+
+test("an explicitly named local CJK font produces a complete card and records the exact font", async () => {
+  const original = JSON.parse(await readFile(path.join(root, "examples/demo-zh.json"), "utf8"));
+  const font = path.join(root, "test/fixtures/ReleaseframeTestCJK.otf");
+  original.font = path.relative(temp, font);
+  for (const panel of original.panels) panel.image = path.join(root, "examples", panel.image);
+  // No spaces: this caption needs character-aware wrapping in the fixed panel.
+  original.panels[0].caption = "页面宽度需要复核".repeat(8);
+  const input = path.join(temp, "chinese.json");
+  await writeFile(input, JSON.stringify(original));
+  const before = await sha(font);
+  const result = await renderManifest({ manifestPath: input, outputDir: path.join(temp, "chinese") });
+  const review = JSON.parse(await readFile(path.join(result.output, "review.json"), "utf8"));
+  assert.equal(review.font.sha256, before);
+  assert.equal(review.font.source, original.font);
+  assert.equal(review.font.family, "ReleaseframeTestCJK");
+  assert.equal(await sha(font), before);
+  assert.deepEqual(result.panels.map(panel => panel.passes), [false, true]);
+  assert.match(await readFile(path.join(result.output, "alt.txt"), "utf8"), /标签变长/);
+  assert.match(await readFile(path.join(result.output, "post.txt"), "utf8"), /中文对照卡片/);
+});
+
+test("font failures and measured text overflow cannot produce a deceptively successful card", async () => {
+  const invalidFont = path.join(temp, "invalid.otf");
+  await writeFile(invalidFont, "not a font");
+  for (const [label, edit, error] of [
+    ["no-cjk-font", input => { input.headline = "中文卡片"; }, /set font/],
+    ["missing-glyph", input => { input.font = path.join(root, "assets/fonts/Inter.ttf"); input.headline = "中文卡片"; }, /selected font lacks/],
+    ["missing-font", input => { input.font = "absent.ttf"; }, /ENOENT/],
+    ["bad-font", input => { input.font = invalidFont; }, /single TTF or OTF/],
+    ["wide-headline", input => { input.headline = "W".repeat(59); }, /headline does not fit/],
+    ["wide-caption", input => { input.panels[0].caption = "W".repeat(90); }, /caption does not fit in two lines/],
+  ]) {
+    const manifest = await copiedManifest(edit), out = path.join(temp, label);
+    await assert.rejects(renderManifest({ manifestPath: manifest, outputDir: out }), error);
+    await assert.rejects(stat(out), /ENOENT/);
+  }
+});

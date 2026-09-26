@@ -13,7 +13,7 @@ This early preview is for a coding agent that has finished a small UI fix or bug
 Node.js 22+ is required. This preview is distributed as a GitHub release tarball, not on npm:
 
 ```sh
-npm install --save-dev https://github.com/codex-improvement-lab/releaseframe/releases/download/v0.1.0-alpha.1/codex-improvement-lab-releaseframe-0.1.0-alpha.1.tgz
+npm install --save-dev https://github.com/codex-improvement-lab/releaseframe/releases/download/v0.1.0-alpha.2/codex-improvement-lab-releaseframe-0.1.0-alpha.2.tgz
 npx releaseframe demo --out ./releaseframe-demo
 ```
 
@@ -31,9 +31,23 @@ The input declares `metric.baseline`, `metric.tolerance`, a `mode` (`at-most` or
 
 Each panel names a local PNG. Both images must have identical dimensions, be 100–8000 pixels in each direction and at most 10 MB each. `cropY` optionally moves the visible window down within both screenshots; it defaults to zero. Keep the two captures at a comparable viewport and state. A crop can hide information, so check the final PNG rather than treating a passing JSON result as visual approval.
 
-The manifest also requires a visible source label, a source URL, a limitation sentence and text for both panels. `postDraft` is caller-written; Releaseframe appends `releaseUrl` once and applies a conservative X length check. It constructs ALT text from the declared numbers and caller-written descriptions, rejecting output over 1,000 characters. The preview renders Latin card text with a bundled OFL Inter font. Other scripts may appear in `postDraft` and panel ALT, but non-Latin titles/captions are rejected until their fonts can be reliably shipped.
+The manifest also requires a visible source label, a source URL, a limitation sentence and text for both panels. `postDraft` is caller-written; Releaseframe appends `releaseUrl` once and applies a conservative X length check. It constructs ALT text from the declared numbers and caller-written descriptions, rejecting output over 1,000 characters. The default card font is bundled OFL Inter. For Chinese or other covered text, set `font` to one local TTF/OTF file relative to the manifest (or an absolute path). The selected font must cover the whole card, including its English badges. Missing glyphs and over-wide labels are rejected before output is created; captions wrap to at most two measured lines. No system fonts are scanned or downloaded.
 
 Only `card.png`, `alt.txt`, `post.txt` and `review.json` leave the renderer. The PNG contains the **visible crop**. The original images are neither modified nor included as hidden layers in the output. The output is **not a privacy scrubber**; review the original screenshots, card and wording before sharing them. Releaseframe never submits a post or changes an account.
+
+## Chinese cards and local fonts
+
+![A Chinese Releaseframe card made with an explicitly supplied Noto font](docs/demo-zh.png)
+
+The [Chinese example](examples/demo-zh.json) uses the same authored screenshots. Place a suitable licensed font such as [Noto Sans CJK SC Regular](https://github.com/notofonts/noto-cjk/blob/main/Sans/OTF/SimplifiedChinese/NotoSansCJKsc-Regular.otf) beside that manifest, named `NotoSansCJKsc-Regular.otf`, or change its `font` path. The full Chinese font is **not bundled**. Then run:
+
+```sh
+npx releaseframe render ./examples/demo-zh.json --out ./chinese-card --json
+```
+
+The renderer reads only the explicitly named font (up to 20 MB) and draws its shaped outlines. `review.json` records its exact SHA-256 and family. No installation, global startup change or online font service is needed. A regular-only font remains regular; a variable weight axis is used when available. Check your font's license before sharing outputs. Font collections and webfont containers are not accepted; general complex-script and emoji support is not promised. Latin and Chinese paths are exercised in tests, with the full Noto font additionally reviewed locally.
+
+Character limits still apply, but equal character counts do not mean equal width. If a field is too wide, shorten that field or choose a narrower font. The numeric labels and badges retain the same declared-value meaning.
 
 ## Why use it?
 
