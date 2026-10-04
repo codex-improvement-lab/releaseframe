@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.0-alpha.3
+
+- Give the screenshots a larger, shared-scale presentation in the same 1120×780 card. Reduce surrounding chrome, show the reference and tolerance once, and retain explicit within/outside labels beside each caption.
+- Preserve the existing source-image crop window when enlarging it; add a pixel-based regression that checks selected content is visible while sentinel bands outside the crop remain hidden.
+- Regenerate the authored SVG examples at 2× pixel density and scale their example `cropY` values accordingly. Keep the same logical scene and declared illustration values.
+- Keep schema/1, the four delivery files, font coverage and measured overflow checks, declared-value semantics and no-overwrite behavior. Card pixels and bundled demo PNG hashes change.
+
 ## 0.1.0-alpha.2
 
 - Accept one explicitly named local TTF/OTF font in the manifest, enabling Chinese and other covered card text without a global font install or network request. Keep bundled Inter as the default.
@@ -14,4 +21,4 @@
 - Write ALT text and a caller-authored post draft beside the PNG. Refuse unsupported images, mismatched dimensions, off-frame crops, missing source/caveat, excessive text and existing output directories.
 - Ship an authored demo, pinned OFL Inter font, API/CLI, tests and clean package smoke path.
 
-Preview scope: Latin card text; supplied values are not inferred from screenshots; no secret removal, automatic posting, pixel equivalence or user-adoption claim.
+Preview scope: text covered by the selected local font; supplied values are not inferred from screenshots; no secret removal, automatic posting or user-adoption claim.

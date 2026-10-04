@@ -43,7 +43,7 @@ test("authored complete loop renders a deterministic, reviewable local card with
   const review = JSON.parse(await readFile(path.join(first.output, "review.json"), "utf8"));
   assert.equal(review.declaredValuesNotMeasuredFromImages, true);
   assert.equal(review.privacyReviewRequired, true);
-  assert.deepEqual(review.panels.map(panel => panel.cropY), [100, 100]);
+  assert.deepEqual(review.panels.map(panel => panel.cropY), [200, 200]);
   assert.deepEqual(review.panels.map(panel => panel.imageSha256), inputHashes);
   const alt = await readFile(path.join(first.output, "alt.txt"), "utf8");
   assert.match(alt, /Authored mobile app drawing/); assert.match(alt, /not measured from the images/);
@@ -70,7 +70,7 @@ test("invalid or ambiguous inputs fail before an output directory is created", a
   for (const [label, edit, error] of [
     ["different-dimensions", input => { input.panels[1].image = otherImage; input.panels[1].cropY = 0; }, /same dimensions/],
     ["missing-image", input => { input.panels[0].image = path.join(temp, "absent.png"); }, /ENOENT/],
-    ["invalid-crop", input => { input.panels[0].cropY = 600; }, /cropY/],
+    ["invalid-crop", input => { input.panels[0].cropY = 8000; }, /cropY/],
     ["missing-source", input => { input.source.label = ""; }, /source.label/],
     ["bidi-override", input => { input.headline = "False\u202eclaim"; }, /control or bidi/],
     ["overlong-headline", input => { input.headline = "W".repeat(60); }, /headline/],
@@ -90,6 +90,32 @@ test("text is escaped as data and previously written output is never overwritten
   await assert.rejects(renderManifest({ manifestPath: file, outputDir: out }), /EEXIST/);
   assert.equal(await sha(path.join(out, "card.png")), digest);
   assert.equal(validateManifest(JSON.parse(await readFile(file, "utf8"))).headline, "A < B & C");
+});
+
+test("larger screenshot presentation does not reveal pixels above or below the declared crop", async () => {
+  const image = path.join(temp, "crop-bands.png");
+  const bands = '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="600">'
+    + '<rect width="400" height="600" fill="#808080"/>'
+    + '<rect width="400" height="95" fill="#ff0000"/>'
+    + '<rect y="100" width="400" height="330" fill="#0000ff"/>'
+    + '<rect y="435" width="400" height="165" fill="#00ff00"/></svg>';
+  await writeFile(image, new Resvg(bands).render().asPng());
+  const manifest = await copiedManifest(input => {
+    for (const panel of input.panels) { panel.image = image; panel.cropY = 100; }
+  });
+  const rendered = await renderManifest({ manifestPath: manifest, outputDir: path.join(temp, "crop-bands") });
+  const png = await readFile(path.join(rendered.output, "card.png"));
+  const pixels = new Resvg('<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="780">'
+    + `<image width="1120" height="780" href="data:image/png;base64,${png.toString("base64")}"/></svg>`).render().pixels;
+  let visible = 0, hidden = 0;
+  for (let i = 0; i < pixels.length; i += 4) {
+    const [r, g, b, a] = pixels.subarray(i, i + 4);
+    if (a !== 255) continue;
+    if (r === 0 && g === 0 && b === 255) visible++;
+    if ((r === 255 && g === 0 && b === 0) || (r === 0 && g === 255 && b === 0)) hidden++;
+  }
+  assert.ok(visible > 100_000, "the selected image region must actually be drawn");
+  assert.equal(hidden, 0, "source pixels outside the selected window must stay out of the exported card");
 });
 
 test("packaged CLI shape gives JSON success and explicit malformed-argument failure", async () => {

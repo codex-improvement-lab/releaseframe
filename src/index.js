@@ -7,7 +7,7 @@ import { renderCardSvg } from "./svg.js";
 import { validateManifest } from "./validate.js";
 import { createTypography } from "./typography.js";
 
-export const version = "0.1.0-alpha.2";
+export const version = "0.1.0-alpha.3";
 export { validateManifest, weightedPostLength } from "./validate.js";
 
 const sha256 = value => createHash("sha256").update(value).digest("hex");

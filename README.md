@@ -13,11 +13,11 @@ This early preview is for a coding agent that has finished a small UI fix or bug
 Node.js 22+ is required. This preview is distributed as a GitHub release tarball, not on npm:
 
 ```sh
-npm install --save-dev https://github.com/codex-improvement-lab/releaseframe/releases/download/v0.1.0-alpha.2/codex-improvement-lab-releaseframe-0.1.0-alpha.2.tgz
+npm install --save-dev https://github.com/codex-improvement-lab/releaseframe/releases/download/v0.1.0-alpha.3/codex-improvement-lab-releaseframe-0.1.0-alpha.3.tgz
 npx releaseframe demo --out ./releaseframe-demo
 ```
 
-The demo uses **authored illustrations and declared example numbers**, not a customer incident. Open `releaseframe-demo/card.png`, then read `alt.txt`, `post.txt` and `review.json`.
+The demo uses **authored illustrations and declared example numbers**, not a customer incident. Open `releaseframe-demo/card.png`, then read `alt.txt`, `post.txt` and `review.json`. The alpha.3 layout gives both screenshots more space, with a shared reference/tolerance line and compact, explicit status labels. The PNG remains 1120×780.
 
 To make your own card, copy [the example manifest](examples/demo.json), change both image paths and every claim, and run:
 
@@ -29,7 +29,7 @@ npx releaseframe render ./my-card.json --out ./my-card --json
 
 The input declares `metric.baseline`, `metric.tolerance`, a `mode` (`at-most` or `at-least`) and each panel's `value`. The badge is derived from those numbers. For example, a width limit of 385px with 1px tolerance rejects 435px and accepts 385px. The tool **does not measure those values from the image pixels**. It records the distinction in `review.json`.
 
-Each panel names a local PNG. Both images must have identical dimensions, be 100–8000 pixels in each direction and at most 10 MB each. `cropY` optionally moves the visible window down within both screenshots; it defaults to zero. Keep the two captures at a comparable viewport and state. A crop can hide information, so check the final PNG rather than treating a passing JSON result as visual approval.
+Each panel names a local PNG. Both images must have identical dimensions, be 100–8000 pixels in each direction and at most 10 MB each. `cropY` optionally moves the visible window down within both screenshots; it defaults to zero and is measured in source-image pixels. The enlarged alpha.3 presentation keeps the same visible source window as alpha.2 for the same input and `cropY`. Keep the two captures at a comparable viewport and state, and supply sharp captures for the larger display. A crop can hide information, so check the final PNG rather than treating a passing JSON result as visual approval.
 
 The manifest also requires a visible source label, a source URL, a limitation sentence and text for both panels. `postDraft` is caller-written; Releaseframe appends `releaseUrl` once and applies a conservative X length check. It constructs ALT text from the declared numbers and caller-written descriptions, rejecting output over 1,000 characters. The default card font is bundled OFL Inter. For Chinese or other covered text, set `font` to one local TTF/OTF file relative to the manifest (or an absolute path). The selected font must cover the whole card, including its English badges. Missing glyphs and over-wide labels are rejected before output is created; captions wrap to at most two measured lines. No system fonts are scanned or downloaded.
 

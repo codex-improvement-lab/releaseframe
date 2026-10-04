@@ -1,6 +1,6 @@
 {
   "name": "@codex-improvement-lab/releaseframe",
-  "version": "0.1.0-alpha.2",
+  "version": "0.1.0-alpha.3",
   "description": "Turn two local screenshots and a declared metric limit into a reviewable release card.",
   "type": "module",
   "license": "MIT",
